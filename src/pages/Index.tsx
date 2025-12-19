@@ -9,7 +9,9 @@ const Index = () => {
     gameState,
     enemies,
     startGame,
+    switchWeapon,
     damageEnemy,
+    clearEnemyHitState,
     damagePlayer,
     updateEnemyPosition,
   } = useGameState();
@@ -39,6 +41,8 @@ const Index = () => {
           onDamageEnemy={damageEnemy}
           onDamagePlayer={damagePlayer}
           onUpdateEnemyPosition={updateEnemyPosition}
+          onClearEnemyHit={clearEnemyHitState}
+          onSwitchWeapon={switchWeapon}
         />
       )}
 

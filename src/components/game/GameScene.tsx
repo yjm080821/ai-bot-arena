@@ -5,7 +5,7 @@ import Arena from './Arena';
 import Player from './Player';
 import EnemyComponent from './Enemy';
 import HUD from './HUD';
-import { Enemy, GameState } from '@/types/game';
+import { Enemy, GameState, WEAPONS, WeaponType } from '@/types/game';
 
 interface GameSceneProps {
   enemies: Enemy[];
@@ -13,6 +13,8 @@ interface GameSceneProps {
   onDamageEnemy: (enemyId: string, damage: number) => void;
   onDamagePlayer: (damage: number) => void;
   onUpdateEnemyPosition: (enemyId: string, position: Vector3) => void;
+  onClearEnemyHit: (enemyId: string) => void;
+  onSwitchWeapon: (weapon: WeaponType) => void;
 }
 
 const GameScene = ({ 
@@ -20,13 +22,16 @@ const GameScene = ({
   gameState, 
   onDamageEnemy, 
   onDamagePlayer,
-  onUpdateEnemyPosition 
+  onUpdateEnemyPosition,
+  onClearEnemyHit,
+  onSwitchWeapon,
 }: GameSceneProps) => {
   const [playerPosition, setPlayerPosition] = useState(new Vector3(0, 1.7, 0));
 
   const handleShoot = useCallback((enemyId: string) => {
-    onDamageEnemy(enemyId, 50); // 2 shots to kill
-  }, [onDamageEnemy]);
+    const weapon = WEAPONS[gameState.currentWeapon];
+    onDamageEnemy(enemyId, weapon.damage);
+  }, [onDamageEnemy, gameState.currentWeapon]);
 
   const handlePlayerHit = useCallback(() => {
     onDamagePlayer(10);
@@ -57,6 +62,8 @@ const GameScene = ({
           onShoot={handleShoot}
           isPlaying={gameState.isPlaying && !gameState.isGameOver}
           onPositionUpdate={setPlayerPosition}
+          currentWeapon={gameState.currentWeapon}
+          onSwitchWeapon={onSwitchWeapon}
         />
 
         {enemies.map(enemy => (
@@ -66,6 +73,7 @@ const GameScene = ({
             playerPosition={playerPosition}
             onUpdatePosition={onUpdateEnemyPosition}
             onPlayerHit={handlePlayerHit}
+            onClearHit={onClearEnemyHit}
           />
         ))}
       </Canvas>
