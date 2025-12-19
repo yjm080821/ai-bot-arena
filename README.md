@@ -1,73 +1,42 @@
-# Welcome to your Lovable project
+# Neon Strike
 
-## Project info
+---
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 프로젝트 개요
 
-## How can I edit this code?
+이 프로젝트는 **웹 브라우저에서 실행되는 1인칭 FPS(Firsr-Person Shooter) 게임 프로토타입**입니다.  
+React와 TypeScript, Three.js를 활용하여 별도의 게임 엔진 없이 **웹 기술만으로 FPS의 핵심 요소**를 구현하는 것을 목표로 합니다.
 
-There are several ways of editing your application.
+플레이어는 1인칭 시점에서 이동 및 사격을 수행하며,  
+정해진 수의 적을 모두 처치하면 게임이 종료되는 구조로 설계되었습니다.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 주요 기능
 
-Changes made via Lovable will be committed automatically to this repo.
+- 1인칭 카메라 시점 (Pointer Lock API 사용)
+- WASD 이동
+- 마우스 클릭을 통한 사격
+- Raycast 기반 피격 판정
+- 적 체력 시스템 및 사망 처리
+- 정해진 적 전부 처치 시 게임 클리어 처리
+- 남은 적 수를 표시하는 간단한 HUD UI
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 사용 기술
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Frontend: React, TypeScript
+- 3D Rendering: Three.js
+- Web API: Pointer Lock API, Keyboard & Mouse Events
+- Deployment: Vercel
+- Platform: v0.app
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 배운 점
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- 웹 환경에서 Three.js를 활용한 3D 씬 구성 방법 이해
+- Pointer Lock API를 이용한 FPS 카메라 제어 방식 학습
+- React와 게임 루프 로직을 분리하여 관리하는 구조 설계 경험
+- 웹 기술만으로도 간단한 FPS 게임 구조를 구현할 수 있음을 확인
