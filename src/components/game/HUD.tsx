@@ -1,4 +1,4 @@
-import { GameState } from '@/types/game';
+import { GameState, WEAPONS } from '@/types/game';
 
 interface HUDProps {
   gameState: GameState;
@@ -7,6 +7,7 @@ interface HUDProps {
 const HUD = ({ gameState }: HUDProps) => {
   const healthPercentage = (gameState.playerHealth / 100) * 100;
   const isLowHealth = gameState.playerHealth <= 30;
+  const currentWeapon = WEAPONS[gameState.currentWeapon];
 
   return (
     <div className="fixed inset-0 pointer-events-none z-10">
@@ -33,6 +34,47 @@ const HUD = ({ gameState }: HUDProps) => {
               className={`health-bar-fill ${isLowHealth ? 'low' : ''}`}
               style={{ width: `${healthPercentage}%` }}
             />
+          </div>
+        </div>
+      </div>
+
+      {/* Weapon Display */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+        <div className="hud-panel p-4">
+          <div className="flex gap-4">
+            {/* Rifle */}
+            <div 
+              className={`px-4 py-2 rounded border-2 transition-all ${
+                gameState.currentWeapon === 'rifle' 
+                  ? 'border-primary bg-primary/20 text-primary' 
+                  : 'border-muted-foreground/30 text-muted-foreground'
+              }`}
+            >
+              <div className="text-xs font-bold mb-1">1</div>
+              <div className="font-display text-sm uppercase tracking-wider">
+                Rifle
+              </div>
+              <div className="text-xs opacity-70">
+                DMG: {WEAPONS.rifle.damage}
+              </div>
+            </div>
+            
+            {/* Sniper */}
+            <div 
+              className={`px-4 py-2 rounded border-2 transition-all ${
+                gameState.currentWeapon === 'sniper' 
+                  ? 'border-neon-pink bg-neon-pink/20 text-neon-pink' 
+                  : 'border-muted-foreground/30 text-muted-foreground'
+              }`}
+            >
+              <div className="text-xs font-bold mb-1">2</div>
+              <div className="font-display text-sm uppercase tracking-wider">
+                Sniper
+              </div>
+              <div className="text-xs opacity-70">
+                DMG: {WEAPONS.sniper.damage}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -66,7 +108,25 @@ const HUD = ({ gameState }: HUDProps) => {
       <div className="absolute top-8 left-1/2 -translate-x-1/2">
         <div className="hud-panel px-6 py-2">
           <span className="font-body text-sm text-muted-foreground">
-            WASD to move • Click to shoot • ESC to pause
+            WASD 이동 • 클릭 사격 • 1/2 무기 교체 • ESC 일시정지
+          </span>
+        </div>
+      </div>
+
+      {/* Current Weapon Indicator */}
+      <div className="absolute top-8 right-8">
+        <div 
+          className="hud-panel px-4 py-2"
+          style={{ 
+            borderColor: gameState.currentWeapon === 'rifle' ? '#00ffff' : '#ff00ff',
+            boxShadow: `0 0 15px ${gameState.currentWeapon === 'rifle' ? '#00ffff33' : '#ff00ff33'}`
+          }}
+        >
+          <span 
+            className="font-display text-lg uppercase tracking-wider"
+            style={{ color: gameState.currentWeapon === 'rifle' ? '#00ffff' : '#ff00ff' }}
+          >
+            {currentWeapon.name}
           </span>
         </div>
       </div>

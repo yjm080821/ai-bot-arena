@@ -1,25 +1,31 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Vector3, Raycaster, Mesh, Vector2 } from 'three';
+import { Vector3, Raycaster, Vector2 } from 'three';
 import { PointerLockControls } from '@react-three/drei';
-import { Enemy } from '@/types/game';
+import { Bullet, WEAPONS, WeaponType } from '@/types/game';
+import BulletComponent from './Bullet';
 
 interface PlayerProps {
-  enemies: Enemy[];
+  enemies: Array<{ id: string; position: Vector3; isAlive: boolean }>;
   onShoot: (enemyId: string) => void;
   isPlaying: boolean;
   onPositionUpdate: (position: Vector3) => void;
+  currentWeapon: WeaponType;
+  onSwitchWeapon: (weapon: WeaponType) => void;
 }
 
-const Player = ({ enemies, onShoot, isPlaying, onPositionUpdate }: PlayerProps) => {
-  const { camera, scene } = useThree();
+const Player = ({ enemies, onShoot, isPlaying, onPositionUpdate, currentWeapon, onSwitchWeapon }: PlayerProps) => {
+  const { camera } = useThree();
   const controlsRef = useRef<any>(null);
   const velocity = useRef(new Vector3());
   const moveState = useRef({ forward: false, backward: false, left: false, right: false });
-  const raycaster = useRef(new Raycaster());
+  const [bullets, setBullets] = useState<Bullet[]>([]);
+  const lastShotTime = useRef(0);
   
   const MOVE_SPEED = 15;
   const ARENA_BOUNDS = 45;
+
+  const weapon = WEAPONS[currentWeapon];
 
   useEffect(() => {
     camera.position.set(0, 1.7, 0);
@@ -31,8 +37,10 @@ const Player = ({ enemies, onShoot, isPlaying, onPositionUpdate }: PlayerProps) 
       case 'KeyS': moveState.current.backward = true; break;
       case 'KeyA': moveState.current.left = true; break;
       case 'KeyD': moveState.current.right = true; break;
+      case 'Digit1': onSwitchWeapon('rifle'); break;
+      case 'Digit2': onSwitchWeapon('sniper'); break;
     }
-  }, []);
+  }, [onSwitchWeapon]);
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
     switch (e.code) {
@@ -46,39 +54,40 @@ const Player = ({ enemies, onShoot, isPlaying, onPositionUpdate }: PlayerProps) 
   const handleClick = useCallback(() => {
     if (!isPlaying) return;
 
-    // Cast ray from camera center
-    raycaster.current.setFromCamera(new Vector2(0, 0), camera);
+    const now = Date.now();
+    const fireInterval = 1000 / weapon.fireRate;
     
-    // Find all enemy meshes
-    const enemyMeshes: Mesh[] = [];
-    scene.traverse((object) => {
-      if (object instanceof Mesh && object.geometry.type === 'BoxGeometry') {
-        const params = (object.geometry.parameters as any);
-        if (params.width === 1.2 && params.height === 1.8) {
-          enemyMeshes.push(object);
-        }
-      }
-    });
+    if (now - lastShotTime.current < fireInterval) return;
+    lastShotTime.current = now;
 
-    const intersects = raycaster.current.intersectObjects(enemyMeshes, false);
+    // Get camera direction
+    const direction = new Vector3();
+    camera.getWorldDirection(direction);
+
+    // Create bullet
+    const bulletId = `bullet-${Date.now()}-${Math.random()}`;
+    const bulletPosition = camera.position.clone().add(direction.clone().multiplyScalar(0.5));
     
-    if (intersects.length > 0) {
-      const hitMesh = intersects[0].object;
-      // Find which enemy was hit based on position
-      enemies.forEach(enemy => {
-        if (enemy.isAlive) {
-          const dist = new Vector3(
-            hitMesh.position.x,
-            hitMesh.position.y,
-            hitMesh.position.z
-          ).distanceTo(enemy.position);
-          if (dist < 2) {
-            onShoot(enemy.id);
-          }
-        }
-      });
-    }
-  }, [camera, scene, enemies, onShoot, isPlaying]);
+    const newBullet: Bullet = {
+      id: bulletId,
+      position: bulletPosition,
+      direction: direction.clone(),
+      speed: weapon.bulletSpeed,
+      color: weapon.bulletColor,
+      createdAt: now,
+    };
+
+    setBullets(prev => [...prev, newBullet]);
+  }, [camera, isPlaying, weapon]);
+
+  const handleBulletRemove = useCallback((bulletId: string) => {
+    setBullets(prev => prev.filter(b => b.id !== bulletId));
+  }, []);
+
+  const handleBulletHitEnemy = useCallback((bulletId: string, _enemyPosition: Vector3, enemyId: string) => {
+    setBullets(prev => prev.filter(b => b.id !== bulletId));
+    onShoot(enemyId);
+  }, [onShoot]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -136,6 +145,17 @@ const Player = ({ enemies, onShoot, isPlaying, onPositionUpdate }: PlayerProps) 
   return (
     <>
       <PointerLockControls ref={controlsRef} />
+      
+      {/* Render bullets */}
+      {bullets.map(bullet => (
+        <BulletComponent
+          key={bullet.id}
+          bullet={bullet}
+          onRemove={handleBulletRemove}
+          onHitEnemy={handleBulletHitEnemy}
+          enemies={enemies}
+        />
+      ))}
     </>
   );
 };

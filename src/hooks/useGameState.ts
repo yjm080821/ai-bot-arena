@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Vector3 } from 'three';
-import { Enemy, GameState } from '@/types/game';
+import { Enemy, GameState, WeaponType } from '@/types/game';
 
 const TOTAL_ENEMIES = 10;
-const ARENA_SIZE = 40;
 
 const generateRandomPosition = (): Vector3 => {
   const angle = Math.random() * Math.PI * 2;
@@ -19,9 +18,12 @@ const createEnemy = (id: string): Enemy => ({
   id,
   position: generateRandomPosition(),
   health: 100,
+  maxHealth: 100,
   isAlive: true,
   targetPosition: new Vector3(0, 1, 0),
   speed: 2 + Math.random() * 2,
+  isHit: false,
+  hitTime: 0,
 });
 
 export const useGameState = () => {
@@ -32,6 +34,7 @@ export const useGameState = () => {
     enemiesKilled: 0,
     totalEnemies: TOTAL_ENEMIES,
     wave: 1,
+    currentWeapon: 'rifle',
   });
 
   const [enemies, setEnemies] = useState<Enemy[]>([]);
@@ -48,7 +51,12 @@ export const useGameState = () => {
       enemiesKilled: 0,
       totalEnemies: TOTAL_ENEMIES,
       wave: 1,
+      currentWeapon: 'rifle',
     });
+  }, []);
+
+  const switchWeapon = useCallback((weapon: WeaponType) => {
+    setGameState(prev => ({ ...prev, currentWeapon: weapon }));
   }, []);
 
   const damageEnemy = useCallback((enemyId: string, damage: number) => {
@@ -61,9 +69,9 @@ export const useGameState = () => {
               ...gs,
               enemiesKilled: gs.enemiesKilled + 1,
             }));
-            return { ...enemy, health: 0, isAlive: false };
+            return { ...enemy, health: 0, isAlive: false, isHit: true, hitTime: Date.now() };
           }
-          return { ...enemy, health: newHealth };
+          return { ...enemy, health: newHealth, isHit: true, hitTime: Date.now() };
         }
         return enemy;
       });
@@ -78,6 +86,12 @@ export const useGameState = () => {
       
       return updated;
     });
+  }, []);
+
+  const clearEnemyHitState = useCallback((enemyId: string) => {
+    setEnemies(prev => prev.map(enemy => 
+      enemy.id === enemyId ? { ...enemy, isHit: false } : enemy
+    ));
   }, []);
 
   const damagePlayer = useCallback((damage: number) => {
@@ -100,7 +114,9 @@ export const useGameState = () => {
     gameState,
     enemies,
     startGame,
+    switchWeapon,
     damageEnemy,
+    clearEnemyHitState,
     damagePlayer,
     updateEnemyPosition,
   };
